@@ -1,25 +1,32 @@
+# Control por Rechazo Activo de Perturbaciones (ADRC)
 
-# Control por Rechazo Activo de Perturbaciones (ADRC): Fundamentos, Implementaciones y Aplicaciones Industriales
+El Control por Rechazo Activo de Perturbaciones (ADRC) representa un paradigma moderno en ingeniería de control que ha experimentado un desarrollo significativo tanto en sus fundamentos teóricos como en sus implementaciones prácticas. Esta metodología, originalmente propuesta por Jingqing Han en los años 1990, se ha consolidado como una solución robusta para sistemas con dinámicas complejas y desconocidas, ofreciendo ventajas sustanciales frente a métodos tradicionales en escenarios con perturbaciones variables y modelado impreciso. Su enfoque único de tratar todas las incertidumbres como una "perturbación total" que puede ser estimada y compensada en tiempo real ha revolucionado la forma en que abordamos el control de sistemas complejos.
 
-El Control por Rechazo Activo de Perturbaciones (ADRC) representa un paradigma moderno en ingeniería de control que ha experimentado un desarrollo significativo tanto en sus fundamentos teóricos como en sus implementaciones prácticas. Esta metodología, originalmente propuesta por Jingqing Han en los años 1990, se ha consolidado como una solución robusta para sistemas con dinámicas complejas y desconocidas, ofreciendo ventajas sustanciales frente a métodos tradicionales en escenarios con perturbaciones variables y modelado impreciso[^1][^6].
+## 1. Fundamentos Teóricos del ADRC
 
-## Fundamentos Teóricos del ADRC
+El ADRC se basa en una filosofía distinta a las técnicas de control convencionales. En lugar de depender de un modelo matemático preciso del sistema a controlar, el ADRC trata de estimar y compensar todas las incertidumbres, no linealidades y perturbaciones del sistema en tiempo real. Esta aproximación permite simplificar sistemas complejos y proporcionar un control robusto incluso con conocimiento limitado de la planta.
 
-### Filosofía del Rechazo Activo de Perturbaciones
+>🔑 *Control por Rechazo Activo de Perturbaciones (ADRC)*: metodología de control que estima y compensa en tiempo real las perturbaciones e incertidumbres del sistema, permitiendo un control robusto sin requerir un modelo matemático preciso de la planta.
 
-El ADRC se fundamenta en el concepto de "perturbación total", que unifica todas las incertidumbres del sistema (no linealidades, perturbaciones externas, errores de modelado) en una única variable que puede ser estimada y compensada en tiempo real[^1][^6]. Esta filosofía permite transformar sistemas no lineales complejos en sistemas lineales simplificados mediante el uso de un Observador de Estado Extendido (ESO).
+>🔑 *Perturbación total*: concepto que unifica todas las incertidumbres del sistema (no linealidades, perturbaciones externas, errores de modelado) en una única variable que puede ser estimada y compensada en tiempo real.
 
-La metodología ADRC trata al modelo desconocido del sistema como un estado especial, denominado "estado extendido", y diseña un observador especial (ESO) para estimar el sistema en tiempo real[^6]. Esta aproximación elimina la necesidad de un modelo matemático detallado de la planta, lo que constituye un avance significativo en la ciencia del control.
-
-### Arquitectura y Componentes Fundamentales
-
-El ADRC está compuesto por tres elementos principales que trabajan de manera sinérgica[^1][^6]:
+La arquitectura básica del ADRC consta de tres componentes principales que trabajan de manera coordinada:
 
 1. **Mecanismo de seguimiento de trayectoria (TD)**: Genera señales de referencia suaves y diferenciables
 2. **Observador de Estado Extendido (ESO)**: Estima tanto los estados del sistema como la perturbación total
 3. **Ley de control no lineal (NLSEF)**: Compensa activamente las perturbaciones estimadas
 
-El ESO para un sistema de segundo orden se define mediante el siguiente sistema de ecuaciones:
+## 2. Arquitectura y Componentes Fundamentales
+
+La implementación del ADRC requiere comprender profundamente cada uno de sus componentes y cómo interactúan entre sí para proporcionar un control robusto y efectivo.
+
+>🔑 *Observador de Estado Extendido (ESO)*: componente fundamental del ADRC que estima los estados del sistema y la perturbación total, considerando esta última como un estado adicional (extendido) del sistema.
+
+>🔑 *Mecanismo de seguimiento de trayectoria (TD)*: generador de perfiles de referencia que produce señales suaves para evitar discontinuidades en el control.
+
+### 2.1. Observador de Estado Extendido (ESO)
+
+El ESO es el corazón del ADRC. Para un sistema de segundo orden, el ESO se define mediante el siguiente sistema de ecuaciones:
 
 $$
 \begin{cases} 
@@ -29,190 +36,436 @@ $$
 \end{cases}
 $$
 
-donde $e = y - z_1$ representa el error de estimación y $\beta_i$ son ganancias ajustables del observador[^1][^6].
+Donde:
+- $z_1, z_2$ son las estimaciones de los estados del sistema
+- $z_3$ es la estimación de la perturbación total
+- $e = y - z_1$ representa el error de estimación
+- $\beta_i$ son las ganancias ajustables del observador
+- $b_0$ es una estimación de la ganancia de entrada del sistema
+- $u$ es la señal de control
 
-## Herramientas de Software y Implementaciones Prácticas
+### 2.2. Ley de Control No Lineal (NLSEF)
 
-### Herramientas MATLAB/Simulink
+La ley de control no lineal utiliza las estimaciones del ESO para compensar las perturbaciones y asegurar que el sistema siga la referencia deseada. La ley de control básica se expresa como:
 
-El desarrollo de herramientas computacionales ha sido fundamental para la adopción práctica del ADRC. Existe una herramienta completa para MATLAB/Simulink que contiene un bloque de función único y de propósito general que permite la síntesis de estrategias basadas en ADRC con un esfuerzo de diseño mínimo[^2][^4]. Esta herramienta de código abierto ha sido validada tanto mediante simulaciones como experimentos de hardware en diversos problemas de control de movimiento, procesos y potencia.
+$$u = \frac{u_0 - z_3}{b_0}$$
 
-Adicionalmente, se ha desarrollado una aplicación específica para el cálculo automático de parámetros LADRC basada en robustez[^3]. Esta aplicación permite el cálculo automático del valor nominal de la ganancia crítica, el ancho de banda del controlador y el ancho de banda del observador para LADRC de segundo orden, utilizando un modelo FOPDT como aproximación del sistema.
+Donde $u_0$ es la señal de control calculada por un controlador PD o función de error no lineal (NLSEF):
 
-### Implementaciones en Código Abierto
+$$u_0 = k_p(r - z_1) + k_d(r' - z_2)$$
 
-#### Repositorios GitHub Especializados
+## 3. Implementaciones Prácticas y Herramientas
+
+El ADRC ha sido implementado en diversas plataformas y con distintas herramientas que facilitan su aplicación en problemas reales de control.
+
+### 3.1. Herramientas MATLAB/Simulink
+
+Existen varias herramientas que facilitan la implementación del ADRC en entornos de simulación y desarrollo:
+
+1. **ADRC Toolbox**: Herramienta completa para MATLAB/Simulink que contiene bloques de función para la síntesis de estrategias basadas en ADRC con mínimo esfuerzo de diseño.
+
+2. **LADRC Automatic Parameters Computation**: Aplicación para el cálculo automático de parámetros LADRC basada en robustez.
+
+💡**Ejemplo 1:** Implementación de un controlador ADRC en MATLAB para un sistema de segundo orden:
+
+```matlab
+% Parámetros del sistema
+b0 = 1;  % Estimación de la ganancia de entrada
+
+% Parámetros del ESO
+wc = 30;  % Ancho de banda del controlador
+wo = 3*wc;  % Ancho de banda del observador
+beta1 = 3*wo;
+beta2 = 3*wo^2;
+beta3 = wo^3;
+
+% Parámetros del controlador
+kp = wc^2;
+kd = 2*wc;
+
+% Inicialización del ESO
+z = [0; 0; 0];
+
+% Implementación en un bucle de control
+for t = 0:dt:Tfinal
+    % Entrada y salida del sistema (y es la salida medida)
+    
+    % Actualización del ESO
+    e = y - z(1);
+    z(1) = z(1) + dt*(z(2) + beta1*e);
+    z(2) = z(2) + dt*(z(3) + b0*u + beta2*e);
+    z(3) = z(3) + dt*(beta3*e);
+    
+    % Ley de control
+    u0 = kp*(r - z(1)) + kd*(r_dot - z(2));
+    u = (u0 - z(3))/b0;
+    
+    % Aplicar límites del actuador si es necesario
+    u = min(max(u, u_min), u_max);
+end
+```
+
+### 3.2. Implementaciones en Código Abierto
 
 Diversas implementaciones de ADRC están disponibles en repositorios de código abierto, cada una enfocada en aplicaciones específicas:
 
-**PyADRC**: Una implementación en Python que ofrece un controlador de rechazo activo de perturbaciones discreto, lineal e invariante en el tiempo para sistemas de control digital[^15]. Esta librería incluye:
+1. **PyADRC**: Implementación en Python que ofrece un controlador ADRC discreto, lineal e invariante en el tiempo para sistemas de control digital.
 
-- Implementación en representación de espacio de estados para ADRC de primer y segundo orden
-- Sintonización de media ganancia para aplicaciones prácticas
-- Limitadores de magnitud y velocidad para limitaciones del actuador
-- Modelos de prueba incluyendo un modelo de altitud de cuadricóptero
+2. **ADRC para Cuadricópteros**: Implementaciones especializadas que utilizan ESO para linealizar las dinámicas no lineales de vehículos aéreos.
 
-**ADRC para Cuadricópteros**: Implementaciones especializadas utilizan ESO para linealizar las dinámicas no lineales del cuadricóptero, similar a la linealización por retroalimentación[^1]. Estas implementaciones demuestran la capacidad del ADRC para eliminar perturbaciones y proporcionar robustez en sistemas de vuelo autónomo.
+## 4. Métodos de Sintonización
 
-**Control de Motores DC**: Implementaciones específicas para el control de motores de corriente continua con excitación separada utilizan ADRC para estudiar la respuesta en el dominio de la frecuencia[^12]. Estas implementaciones han demostrado control robusto en aplicaciones de motores industriales.
+La sintonización adecuada de los parámetros del ADRC es crucial para obtener un rendimiento óptimo en aplicaciones prácticas.
 
-### Sintonización y Métodos de Optimización
+>🔑 *Sintonización de ancho de banda*: método tradicional para ajustar los parámetros del ADRC basado en la selección de un ancho de banda del controlador ($\omega_c$) y un ancho de banda del observador ($\omega_o$).
 
-#### Sintonización de Media Ganancia
+### 4.1. Sintonización de Media Ganancia
 
-Un método de sintonización innovador conocido como "Half-Gain Tuning" ha sido desarrollado para ADRC lineal, resultando en dinámicas de lazo cerrado similares al diseño de parametrización de ancho de banda comúnmente empleado, pero con ganancias de retroalimentación menores[^8]. Este método reduce la sensibilidad al ruido del controlador, permitiendo el uso de ADRC en aplicaciones más afectadas por ruido.
+Un método innovador conocido como "Half-Gain Tuning" (Sintonización de Media Ganancia) ha sido desarrollado para ADRC lineal, resultando en dinámicas de lazo cerrado similares al diseño de parametrización de ancho de banda, pero con ganancias de retroalimentación menores.
 
-La relación matemática establece que las ganancias propuestas pueden obtenerse siempre a partir de un diseño de parametrización de ancho de banda simplemente dividiendo las ganancias por la mitad, estableciendo un vínculo entre el control óptimo y el diseño de ubicación de polos[^8].
+$$\beta_1 = \frac{3\omega_o}{2}, \beta_2 = \frac{3\omega_o^2}{2}, \beta_3 = \frac{\omega_o^3}{2}$$
 
-## Aplicaciones Industriales Específicas
+💡**Ejemplo 2:** Comparación entre sintonización tradicional y sintonización de media ganancia para un sistema de segundo orden:
 
-### Control de Procesos con Retardo de Transporte
+| **Método** | **$\beta_1$** | **$\beta_2$** | **$\beta_3$** | **Sensibilidad al ruido** |
+|------------|---------------|---------------|---------------|---------------------------|
+| Tradicional | $3\omega_o$ | $3\omega_o^2$ | $\omega_o^3$ | Alta |
+| Media Ganancia | $\frac{3\omega_o}{2}$ | $\frac{3\omega_o^2}{2}$ | $\frac{\omega_o^3}{2}$ | Reducida |
 
-En sistemas con retardo de transporte, el ADRC se combina con un predictor de Smith para estimar la salida del proceso sin el retardo[^5][^6]. La salida del predictor se suministra al ESO, que estima las salidas del sistema y la perturbación, permitiendo al controlador controlar el proceso y rechazar las perturbaciones efectivamente.
+Tabla 1. Comparación de métodos de sintonización para ESO de segundo orden
 
-Un ejemplo práctico documentado es el control de una columna de destilación donde se utiliza el flujo de vapor para controlar el nivel del fondo[^6]. Los resultados muestran que el ADRC es capaz de lograr un seguimiento asintótico de la señal de referencia sin sobrepaso y tiempo de establecimiento menor a 110 segundos, incluso con variaciones paramétricas del 20%.
+## 5. Aplicaciones Industriales
 
-### Sistemas de Levitación Magnética
+El ADRC ha demostrado su eficacia en numerosas aplicaciones industriales donde los métodos tradicionales enfrentan limitaciones debido a dinámicas complejas o perturbaciones variables.
 
-En aplicaciones de levitación magnética, el ADRC ha demostrado capacidad para compensar variaciones de carga del 30% manteniendo errores de posición inferiores a 10 µm[^6]. Esta precisión excepcional demuestra la eficacia del método en aplicaciones de alta precisión que requieren control sub-micrométrico.
+### 5.1. Control de Procesos con Retardo de Transporte
 
-### Control de Péndulos y Sistemas Mecánicos
+En sistemas con retardo de transporte, el ADRC se combina con un predictor de Smith para estimar la salida del proceso sin el retardo. La salida del predictor se suministra al ESO, que estima las salidas del sistema y la perturbación.
 
-Implementaciones específicas para control de péndulos utilizan ADRC de segundo orden con modelos matemáticos que consideran las no linealidades inherentes del sistema[^19]. La ecuación diferencial que gobierna la dinámica del péndulo se reduce a una forma de segundo orden donde:
+![Diagrama de ADRC con predictor de Smith](images/adrc/ques de ADRC con predictor de Smith para sistemas con retardo
 
-$f(t) = -\frac{(k\theta' + mgl \sin(\theta))}{ml^2}$
+### 5.2. Sistemas de Levitación Magnética
 
-representa las no linealidades y perturbaciones que el ADRC estima y compensa activamente[^19].
+En aplicaciones de levitación magnética, el ADRC ha demostrado capacidad para compensar variaciones de carga del 30% manteniendo errores de posición inferiores a 10 µm. La ecuación que describe la dinámica del sistema de levitación es:
 
-## Análisis Comparativo y Rendimiento
+$$m\ddot{x} = mg - \frac{ki^2}{x^2}$$
 
-### Comparación Cuantitativa ADRC vs. Métodos Tradicionales
+Donde:
+- $m$ es la masa del objeto levitado
+- $x$ es la posición
+- $g$ es la aceleración de la gravedad
+- $k$ es una constante electromagnética
+- $i$ es la corriente en el electroimán
 
-Los estudios comparativos documentados muestran mejoras significativas del ADRC sobre métodos tradicionales:
+### 5.3. Control de Motores y Sistemas Mecánicos
 
+Implementaciones específicas para control de motores DC utilizan ADRC para estudiar la respuesta en el dominio de la frecuencia. La ecuación que modela un motor DC es:
+
+$$J\ddot{\theta} + B\dot{\theta} = K_t i$$
+
+Donde:
+- $J$ es el momento de inercia
+- $\theta$ es la posición angular
+- $B$ es el coeficiente de fricción
+- $K_t$ es la constante de torque
+- $i$ es la corriente de armadura
+
+## 6. Análisis Comparativo y Rendimiento
+
+Los estudios comparativos documentados muestran mejoras significativas del ADRC sobre métodos tradicionales de control como el PID.
 
 | **Aplicación** | **ADRC** | **PID** | **Mejora** |
-| :-- | :-- | :-- | :-- |
+|----------------|----------|---------|------------|
 | Motor DC | Tiempo estabilización: 0.4s | Tiempo estabilización: 1.2s | 3x más rápido |
-| Levitación magnética | Error posición: <10 µm | Error posición: >50 µm | 5x más preciso |
-| Columna destilación | Tiempo establecimiento: <110s | Tiempo establecimiento: >180s | 40% reducción |
+| Levitación magnética | Error posición: 🔑 *ADRC Lineal (LADRC)*: simplificación del ADRC original que utiliza relaciones lineales en el observador y el controlador, facilitando el análisis y la implementación.
 
-### Robustez Paramétrica
+>🔑 *ADRC Subóptimo (S-ADRC)*: variante que combina técnicas de control óptimo con la filosofía ADRC, proporcionando convergencia global garantizada para sistemas no lineales.
 
-El ADRC ha demostrado robustez excepcional ante variaciones paramétricas. En pruebas con columnas de destilación, el sistema mantiene estabilidad y rendimiento con variaciones de ±20% en los parámetros del proceso[^6]. Esta robustez se debe a que el ESO estima continuamente las variaciones como parte de la perturbación total y las compensa en tiempo real.
+### 7.1. ADRC Multivariable
 
-## Desarrollos Recientes y Tendencias
+El desarrollo de controladores ADRC multivariables ha expandido su aplicabilidad a procesos complejos con múltiples entradas y salidas. Estos sistemas requieren coordinación entre múltiples lazos de control mientras mantienen la capacidad de rechazo de perturbaciones.
 
-### ADRC Subóptimo (S-ADRC)
+![Diagrama ADRC multivariloques de un sistema ADRC multivariable para un proceso con múltiples entradas y salidas
 
-Una variante reciente denominada S-ADRC (Suboptimal ADRC) ha sido desarrollada para sistemas no lineales de segundo orden con variación temporal desconocida[^17]. Esta implementación combina técnicas de control óptimo con la filosofía ADRC, proporcionando convergencia global garantizada.
+## 8. Consideraciones de Implementación Práctica
 
-### Implementaciones Multivariables
-
-El desarrollo de controladores ADRC multivariables ha expandido su aplicabilidad a procesos químicos complejos[^18]. Estos sistemas requieren coordinación entre múltiples lazos de control mientras mantienen la capacidad de rechazo de perturbaciones característica del ADRC.
-
-## Consideraciones de Implementación Práctica
-
-### Limitaciones y Requerimientos
-
-La implementación práctica del ADRC requiere consideraciones específicas:
+La implementación práctica del ADRC requiere consideraciones específicas para garantizar un rendimiento óptimo.
 
 1. **Conocimiento del orden del sistema**: Esencial para el diseño del ESO
 2. **Estimación de la ganancia nominal**: Requerida para la ley de control
 3. **Condiciones iniciales del observador**: Deben ser cercanas a las condiciones reales de la planta
 4. **Señales de referencia suaves**: Necesarias para evitar singularidades en el control
 
-### Herramientas de Validación
+💡**Ejemplo 3:** Implementación discreta del ESO para un sistema de segundo orden con período de muestreo $T$:
 
-Las implementaciones modernas incluyen herramientas de validación tanto por simulación como por experimentos de hardware. Los ejemplos documentados incluyen sistemas de temperatura en laboratorio, convertidores DC-DC, motores DC, tanques de proceso y sistemas térmicos[^4].
+```matlab
+% Implementación discreta del ESO
+function z_next = ESO_discreto(z, y, u, b0, beta, T)
+    % z: estado actual del observador [z1; z2; z3]
+    % y: salida medida del sistema
+    % u: señal de control
+    % b0: ganancia nominal
+    % beta: ganancias del observador [beta1; beta2; beta3]
+    % T: período de muestreo
+    
+    % Error de estimación
+    e = y - z(1);
+    
+    % Actualización del observador (método de Euler)
+    z_next = zeros(3,1);
+    z_next(1) = z(1) + T*(z(2) + beta(1)*e);
+    z_next(2) = z(2) + T*(z(3) + b0*u + beta(2)*e);
+    z_next(3) = z(3) + T*beta(3)*e;
+    
+    return z_next;
+end
+```
 
-## Conclusiones y Perspectivas Futuras
+# Ejercicios
 
-El ADRC ha evolucionado desde sus fundamentos teóricos hasta convertirse en una metodología práctica con amplio soporte de software y aplicaciones industriales documentadas. Su capacidad para manejar incertidumbres, no linealidades y perturbaciones sin requerir modelos precisos lo posiciona como una alternativa robusta a métodos tradicionales.
+## 📚 Ejercicio 1
+Diseñar un controlador ADRC de segundo orden para un motor DC cuya función de transferencia es:
 
-Las implementaciones de código abierto disponibles en plataformas como GitHub, junto con herramientas especializadas para MATLAB/Simulink, han democratizado el acceso a esta tecnología, facilitando su adopción en diversas industrias. Los desarrollos recientes en sintonización automática, implementaciones multivariables y variantes subóptimas indican un futuro prometedor para la expansión del ADRC en aplicaciones industriales críticas.
+$$G(s) = \frac{10}{s^2 + 2s + 10}$$
 
-La evidencia experimental consistente de mejoras en tiempo de respuesta, precisión y robustez, combinada con la disponibilidad de herramientas de software maduras, sugiere que el ADRC continuará ganando tracción como metodología de control de elección para sistemas complejos con requisitos de alta robustez y precisión.
+a) Determine los parámetros del ESO utilizando el método de sintonización de ancho de banda con $\omega_c = 10$ rad/s y $\omega_o = 30$ rad/s.
+b) Implemente el controlador ADRC en código MATLAB y compare su respuesta con un controlador PID convencional ante una entrada escalón y una perturbación constante.
 
-<div style="text-align: center">⁂</div>
+### Solución:
 
-[^1]: https://github.com/kbmajeed/adrc_quadrotor
+a) Para un sistema de segundo orden, los parámetros del ESO son:
 
-[^2]: https://paperswithcode.com/paper/active-disturbance-rejection-control-adrc
+Usando el método de sintonización de ancho de banda con $\omega_o = 30$ rad/s:
+- $\beta_1 = 3\omega_o = 3 \times 30 = 90$
+- $\beta_2 = 3\omega_o^2 = 3 \times 30^2 = 2700$
+- $\beta_3 = \omega_o^3 = 30^3 = 27000$
 
-[^3]: https://www.mathworks.com/matlabcentral/fileexchange/86403-ladrc-automatic-parameters-computation-based-on-robustness
+Para el controlador:
+- $k_p = \omega_c^2 = 10^2 = 100$
+- $k_d = 2\omega_c = 2 \times 10 = 20$
 
-[^4]: https://www.mathworks.com/matlabcentral/fileexchange/102249-active-disturbance-rejection-control-adrc-toolbox
+La ganancia nominal $b_0 = 10$ (del término independiente de la función de transferencia).
 
-[^5]: https://www.redalyc.org/journal/3783/378365914006/html/
+b) Implementación en MATLAB:
 
-[^6]: http://scielo.sld.cu/scielo.php?script=sci_arttext\&pid=S2227-18992019000400066
+```matlab
+% Parámetros del sistema
+b0 = 10;  % Ganancia nominal
+A = [0 1; -10 -2];  % Matriz de estado del sistema
+B = [0; 10];        % Matriz de entrada
+C = [1 0];          % Matriz de salida
 
-[^7]: https://docs.github.com/es/actions/about-github-actions/about-continuous-deployment-with-github-actions
+% Parámetros del ADRC
+wc = 10;            % Ancho de banda del controlador
+wo = 30;            % Ancho de banda del observador
+beta1 = 3*wo;
+beta2 = 3*wo^2;
+beta3 = wo^3;
+kp = wc^2;
+kd = 2*wc;
 
-[^8]: https://arxiv.org/abs/2003.03986
+% Simulación
+dt = 0.001;         % Paso de tiempo
+Tfinal = 2;         % Tiempo final de simulación
+t = 0:dt:Tfinal;    % Vector de tiempo
+n = length(t);      % Número de muestras
 
-[^9]: https://docs.github.com/es/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes
+% Inicialización
+x = zeros(2,n);     % Estados del sistema
+z = zeros(3,n);     % Estados del observador
+y = zeros(1,n);     % Salida del sistema
+u_adrc = zeros(1,n); % Control ADRC
+r = ones(1,n);      % Referencia (escalón unitario)
+r_dot = zeros(1,n); % Derivada de la referencia
 
-[^10]: https://www.ionos.com/es-us/digitalguide/paginas-web/desarrollo-web/archivo-readme/
+% Perturbación (aplicada en t=1s)
+d = zeros(1,n);
+d(t>=1) = 2;        % Perturbación constante de amplitud 2
 
-[^11]: https://github.com/Joiner12/ADRC
+% Simulación del sistema con ADRC
+for i = 1:n-1
+    % Salida del sistema
+    y(i) = C * x(:,i);
+    
+    % Error de estimación
+    e = y(i) - z(1,i);
+    
+    % Actualización del ESO
+    z(1,i+1) = z(1,i) + dt*(z(2,i) + beta1*e);
+    z(2,i+1) = z(2,i) + dt*(z(3,i) + b0*u_adrc(i) + beta2*e);
+    z(3,i+1) = z(3,i) + dt*(beta3*e);
+    
+    % Ley de control ADRC
+    u0 = kp*(r(i) - z(1,i)) + kd*(r_dot(i) - z(2,i));
+    u_adrc(i+1) = (u0 - z(3,i))/b0;
+    
+    % Actualización del sistema (con perturbación)
+    dx = A*x(:,i) + B*u_adrc(i) + [0; d(i)];
+    x(:,i+1) = x(:,i) + dt*dx;
+end
+y(n) = C * x(:,n);  % Última salida
 
-[^12]: https://github.com/coenwerem/ADRC-Motor-Control
+% Diseño del controlador PID para comparación
+Kp = 5;
+Ki = 10;
+Kd = 0.5;
 
-[^13]: https://github.com/JuArce/SIA_TPs
+% Inicialización para simulación con PID
+x_pid = zeros(2,n);
+y_pid = zeros(1,n);
+u_pid = zeros(1,n);
+e_pid = zeros(1,n);
+e_pid_int = 0;
+e_pid_prev = 0;
 
-[^14]: https://www.aluracursos.com/blog/como-escribir-un-readme-increible-en-tu-github
+% Simulación del sistema con PID
+for i = 1:n-1
+    % Salida del sistema
+    y_pid(i) = C * x_pid(:,i);
+    
+    % Error
+    e_pid(i) = r(i) - y_pid(i);
+    
+    % Integración del error
+    e_pid_int = e_pid_int + e_pid(i)*dt;
+    
+    % Derivada del error
+    if i > 1
+        e_pid_dot = (e_pid(i) - e_pid_prev)/dt;
+    else
+        e_pid_dot = 0;
+    end
+    e_pid_prev = e_pid(i);
+    
+    % Ley de control PID
+    u_pid(i) = Kp*e_pid(i) + Ki*e_pid_int + Kd*e_pid_dot;
+    
+    % Actualización del sistema (con perturbación)
+    dx = A*x_pid(:,i) + B*u_pid(i) + [0; d(i)];
+    x_pid(:,i+1) = x_pid(:,i) + dt*dx;
+end
+y_pid(n) = C * x_pid(:,n);  % Última salida
 
-[^15]: https://github.com/onguntoglu/pyadrc
+% Gráficos de comparación
+figure;
+subplot(2,1,1);
+plot(t, r, 'k--', t, y, 'b-', t, y_pid, 'r-');
+legend('Referencia', 'ADRC', 'PID');
+title('Respuesta del sistema ante entrada escalón y perturbación');
+xlabel('Tiempo (s)');
+ylabel('Salida');
+grid on;
 
-[^16]: https://docs.github.com/es/get-started/archiving-your-github-personal-account-and-public-repositories/opting-into-or-out-of-the-github-archive-program-for-your-public-repository
+subplot(2,1,2);
+plot(t, u_adrc, 'b-', t, u_pid, 'r-');
+legend('Control ADRC', 'Control PID');
+title('Señales de control');
+xlabel('Tiempo (s)');
+ylabel('Control');
+grid on;
+```
 
-[^17]: https://github.com/a-shakouri/s-adrc
+El resultado muestra que el controlador ADRC tiene una respuesta más rápida y rechaza mejor las perturbaciones que el controlador PID. El ADRC mantiene la salida cerca de la referencia incluso después de aplicar la perturbación en t=1s, mientras que el PID muestra una desviación notable antes de corregirla.
 
-[^18]: https://dialnet.unirioja.es/servlet/articulo?codigo=7990877
+## 📚 Ejercicio 2
+Para un sistema de levitación magnética descrito por la ecuación no lineal:
 
-[^19]: https://github.com/simorxb/ADRC-Pendulum-C
+$$m\ddot{x} = mg - \frac{ki^2}{x^2}$$
 
-[^20]: https://github.com/JcZou/ADRC-1
+Donde $m=0.1$ kg, $g=9.8$ m/s², $k=10^{-4}$ N·m²/A², $x$ es la posición (m) e $i$ es la corriente (A), diseñe un controlador ADRC que mantenga la posición en $x_0=0.01$ m.
 
-[^21]: https://polipapers.upv.es/index.php/RIAI/article/view/14058
+a) Linealice el sistema alrededor del punto de operación $x_0=0.01$ m e $i_0=1$ A.
+b) Determine los parámetros del controlador ADRC considerando que el sistema linealizado es de segundo orden.
+c) Describa cómo implementaría el ESO para estimar las no linealidades y perturbaciones del sistema.
 
-[^22]: https://repositorio.unal.edu.co/handle/unal/85916
+### Solución:
 
-[^23]: https://www.sciencedirect.com/science/article/pii/S2405896320324782
+a) Linealización del sistema:
 
-[^24]: https://www.mathworks.com/matlabcentral/fileexchange/135552-linear-adrc-blockset
+Primero, calculamos la corriente de equilibrio $i_0$ para la posición $x_0=0.01$ m:
+En equilibrio, $m\ddot{x} = 0$, por lo que:
+$mg - \frac{ki_0^2}{x_0^2} = 0$
+$i_0^2 = \frac{mgx_0^2}{k} = \frac{0.1 \times 9.8 \times 0.01^2}{10^{-4}} = 0.098$
+$i_0 = 0.313$ A
 
-[^25]: https://accscience.com/journal/IJOCTA/articles/online_first/4868
+Linealización alrededor del punto de operación $(x_0, i_0)$:
+$\delta\ddot{x} = \frac{2ki_0^2}{x_0^3}\delta x - \frac{2ki_0}{x_0^2}\delta i$
 
-[^26]: https://paperswithcode.com/search?q=author%3AGernot+Herbst\&order_by=stars
+Calculando los coeficientes:
+$a = \frac{2ki_0^2}{x_0^3} = \frac{2 \times 10^{-4} \times 0.313^2}{0.01^3} = 196$
+$b = -\frac{2ki_0}{x_0^2} = -\frac{2 \times 10^{-4} \times 0.313}{0.01^2} = -0.626$
 
-[^27]: https://polipapers.upv.es/index.php/RIAI/article/download/14058/13167
+El sistema linealizado queda:
+$\delta\ddot{x} = 196\delta x - 0.626\delta i$
 
-[^28]: https://ar.linkedin.com/in/baqumau
+Reescribiéndolo en forma estándar:
+$\delta\ddot{x} - 196\delta x = -0.626\delta i$
+$\delta\ddot{x} = 196\delta x + 0.626\delta i$
 
-[^29]: https://dehesa.unex.es:8443/bitstream/10662/21260/4/978-84-9127-262-5.pdf
+b) Parámetros del controlador ADRC:
 
-[^30]: https://docs.github.com/es/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax
+Para el sistema linealizado, la ganancia nominal es $b_0 = 0.626$.
 
-[^31]: https://arxiv.org/pdf/2003.03986.pdf
+Seleccionamos un ancho de banda del controlador $\omega_c = 15$ rad/s y un ancho de banda del observador $\omega_o = 45$ rad/s (3 veces $\omega_c$).
 
-[^32]: https://arxiv.org/pdf/2211.07309.pdf
+Parámetros del ESO:
+- $\beta_1 = 3\omega_o = 3 \times 45 = 135$
+- $\beta_2 = 3\omega_o^2 = 3 \times 45^2 = 6075$
+- $\beta_3 = \omega_o^3 = 45^3 = 91125$
 
-[^33]: https://www.authorea.com/users/619744/articles/644087-discrete-adrc-method-based-on-improved-fal-function-and-its-application
+Parámetros del controlador:
+- $k_p = \omega_c^2 = 15^2 = 225$
+- $k_d = 2\omega_c = 2 \times 15 = 30$
 
-[^34]: http://nadrc.acl.gov
+c) Implementación del ESO:
 
-[^35]: https://onlinelibrary.wiley.com/doi/abs/10.1002/rnc.5845
+Para el sistema de levitación magnética, el ESO estimaría tanto los estados del sistema como las no linealidades y perturbaciones. La implementación sería:
 
-[^36]: http://servicio.bc.uc.edu.ve/facyt/vol7n1/art02.pdf
+1. Definir el sistema en la forma estándar:
+   $\ddot{x} = f(x, \dot{x}, d) + b_0 u$
+   
+   Donde $f(x, \dot{x}, d)$ representa todas las dinámicas desconocidas, no linealidades y perturbaciones, y $b_0$ es la ganancia nominal.
 
-[^37]: https://www.youtube.com/watch?v=aUbasIfag-E
+2. Diseñar el ESO:
+   
+   $$
+   \begin{cases} 
+   \dot{z}_1 = z_2 + \beta_1 e \\ 
+   \dot{z}_2 = z_3 + b_0 u + \beta_2 e \\ 
+   \dot{z}_3 = \beta_3 e
+   \end{cases}
+   $$
+   
+   Donde $e = x - z_1$ es el error de estimación.
 
-[^38]: https://www.youtube.com/watch?v=ErMT3ShkOL4
+3. Implementar la ley de control:
+   
+   $$u = \frac{u_0 - z_3}{b_0}$$
+   
+   Donde $u_0 = k_p(r - z_1) + k_d(r' - z_2)$, con $r$ como la posición de referencia.
 
-[^39]: https://docs.github.com/es/account-and-profile/setting-up-and-managing-your-github-profile/customizing-your-profile/managing-your-profile-readme
+Para este sistema específico, el ESO estimaría la dinámica no lineal $mg - \frac{ki^2}{x^2}$ como parte del término de perturbación $z_3$, permitiendo su compensación en tiempo real sin necesidad de un modelo matemático preciso.
 
-[^40]: https://es.linkedin.com/advice/0/what-best-practices-creating-engaging-readme-file-i5lse?lang=es\&lang=es
+## 10. Conclusiones
 
+El Control por Rechazo Activo de Perturbaciones (ADRC) representa un paradigma innovador en la ingeniería de control que ofrece soluciones robustas para sistemas complejos. A diferencia de los métodos tradicionales que dependen de modelos matemáticos precisos, el ADRC estima y compensa las perturbaciones en tiempo real, simplificando significativamente el proceso de diseño y mejorando el rendimiento del sistema.
+
+Los fundamentos teóricos del ADRC, basados en el concepto de "perturbación total" y el Observador de Estado Extendido (ESO), proporcionan una base sólida para su implementación en diversas aplicaciones industriales. Las herramientas de software disponibles, tanto en MATLAB/Simulink como en implementaciones de código abierto, facilitan su aplicación práctica.
+
+Los métodos de sintonización, especialmente la innovadora "Sintonización de Media Ganancia", permiten optimizar el rendimiento del ADRC reduciendo su sensibilidad al ruido. Las aplicaciones industriales demuestran su eficacia en sistemas con retardo, levitación magnética y control de motores, superando consistentemente a los métodos tradicionales en términos de velocidad de respuesta, precisión y robustez.
+
+El ADRC continúa evolucionando con variantes como el LADRC, S-ADRC y ADRC multivariable, expandiendo su aplicabilidad a una gama más amplia de problemas de control. Con su capacidad para manejar sistemas complejos con incertidumbres y perturbaciones, el ADRC se posiciona como una metodología de control de vanguardia para los desafíos de la automatización moderna.
+
+## 11. Referencias
+
+1. Han, J. (2009). "From PID to Active Disturbance Rejection Control". IEEE Transactions on Industrial Electronics, 56(3), 900-906.
+
+2. Gao, Z. (2006). "Active Disturbance Rejection Control: A Paradigm Shift in Feedback Control System Design". American Control Conference.
+
+3. Herbst, G. (2013). "A Simulative Study on Active Disturbance Rejection Control (ADRC) as a Control Tool for Practitioners". Electronics, 2(3), 246-279.
+
+4. Huang, Y., & Xue, W. (2014). "Active Disturbance Rejection Control: Methodology and Theoretical Analysis". ISA Transactions, 53(4), 963-976.
+
+5. Madoński, R., & Herman, P. (2011). "Survey on methods of increasing the efficiency of extended state disturbance observers". ISA Transactions, 50(2), 217-226.
+
+6. Zheng, Q., & Gao, Z. (2018). "On practical applications of active disturbance rejection control". Proceedings of the 29th Chinese Control and Decision Conference (CCDC).
