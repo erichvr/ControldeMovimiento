@@ -329,6 +329,10 @@ grid on;
 
 El resultado muestra que el controlador ADRC tiene una respuesta más rápida y rechaza mejor las perturbaciones que el controlador PID. El ADRC mantiene la salida cerca de la referencia incluso después de aplicar la perturbación en t=1s, mientras que el PID muestra una desviación notable antes de corregirla.
 
+![image](https://github.com/user-attachments/assets/44dd7d00-602b-464a-afc9-abdb316068fb)
+Figura. Codigo Matlab, comparación PID vs ADRC
+
+
 ## 📚 Ejercicio 2
 Para un sistema de levitación magnética descrito por la ecuación no lineal:
 
