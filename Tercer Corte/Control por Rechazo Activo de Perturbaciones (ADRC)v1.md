@@ -1,6 +1,6 @@
 # Control por Rechazo Activo de Perturbaciones (ADRC)
 
-El Control por Rechazo Activo de Perturbaciones (ADRC) representa un paradigma moderno en ingeniería de control que ha experimentado un desarrollo significativo tanto en sus fundamentos teóricos como en sus implementaciones prácticas. Esta metodología, originalmente propuesta por Jingqing Han en los años 1990, se ha consolidado como una solución robusta para sistemas con dinámicas complejas y desconocidas, ofreciendo ventajas sustanciales frente a métodos tradicionales en escenarios con perturbaciones variables y modelado impreciso. Su enfoque único de tratar todas las incertidumbres como una "perturbación total" que puede ser estimada y compensada en tiempo real ha revolucionado la forma en que abordamos el control de sistemas complejos.
+El Control por Rechazo Activo de Perturbaciones (ADRC) representa un modelo moderno en ingeniería de control que ha experimentado un desarrollo significativo tanto en sus fundamentos teóricos como en sus implementaciones prácticas. Esta metodología, originalmente propuesta por Jingqing Han en los años 1990, se ha consolidado como una solución robusta para sistemas con dinámicas complejas, ofreciendo ventajas frente a otros métodos en escenarios con perturbaciones variables y modelado impreciso. Se enfoca en tratar todas las incertidumbres como una "perturbación total" que puede ser estimada y compensada en tiempo real.
 
 ## 1. Fundamentos Teóricos del ADRC
 
@@ -66,44 +66,6 @@ Existen varias herramientas que facilitan la implementación del ADRC en entorno
 
 2. **LADRC Automatic Parameters Computation**: Aplicación para el cálculo automático de parámetros LADRC basada en robustez.
 
-💡**Ejemplo 1:** Implementación de un controlador ADRC en MATLAB para un sistema de segundo orden:
-
-```matlab
-% Parámetros del sistema
-b0 = 1;  % Estimación de la ganancia de entrada
-
-% Parámetros del ESO
-wc = 30;  % Ancho de banda del controlador
-wo = 3*wc;  % Ancho de banda del observador
-beta1 = 3*wo;
-beta2 = 3*wo^2;
-beta3 = wo^3;
-
-% Parámetros del controlador
-kp = wc^2;
-kd = 2*wc;
-
-% Inicialización del ESO
-z = [0; 0; 0];
-
-% Implementación en un bucle de control
-for t = 0:dt:Tfinal
-    % Entrada y salida del sistema (y es la salida medida)
-    
-    % Actualización del ESO
-    e = y - z(1);
-    z(1) = z(1) + dt*(z(2) + beta1*e);
-    z(2) = z(2) + dt*(z(3) + b0*u + beta2*e);
-    z(3) = z(3) + dt*(beta3*e);
-    
-    % Ley de control
-    u0 = kp*(r - z(1)) + kd*(r_dot - z(2));
-    u = (u0 - z(3))/b0;
-    
-    % Aplicar límites del actuador si es necesario
-    u = min(max(u, u_min), u_max);
-end
-```
 
 ### 3.2. Implementaciones en Código Abierto
 
